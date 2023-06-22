@@ -1,0 +1,302 @@
+id: homeassistant_statistiche
+type: custom:config-template-card
+variables:
+  - states['sensor.node_server_disk_used_percentage_2'].state
+  - states['sensor.node_server_disk_total_2'].state
+  - states['sensor.node_server_disk_used_2'].state
+entities:
+  - sensor.node_server_disk_used_percentage_2
+  - sensor.node_server_disk_total_2
+  - sensor.node_server_disk_used_2
+card:
+  type: entities
+  show_header_toggle: 'off'
+  style: |
+    .card-header {
+      padding: 0px 0px 0px 0px !important;
+      }
+  entities:
+    - type: section
+      label: Statistiche PROXMOX
+    - type: custom:hui-element
+      card_type: vertical-stack
+      cards:
+        - type: horizontal-stack
+          cards:
+            - type: picture
+              style: |
+                ha-card {
+                    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                    --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                    --ha-card-box-shadow: 'none';
+                }
+              image: /local/foto-pkg/proxmox-logo.gif
+              tap_action:
+                action: fire-dom-event
+                browser_mod:
+                  service: browser_mod.popup
+                  data:
+                    title: Statistiche
+                    style: >
+                      --popup-background-color:
+                      var(--secondary-background-color);
+
+                      --dialog-backdrop-filter: blur(2em) brightness(0.75);
+                    content:
+                      type: vertical-stack
+                      cards:
+                        - type: horizontal-stack
+                          cards:
+                            - type: custom:mini-graph-card
+                              entities:
+                                - entity: sensor.node_server_disk_used_percentage_2
+                                  unit: '%'
+                              align_state: center
+                              align_header: center
+                              hour24: true
+                              show:
+                                name: true
+                                icon: false
+                                average: false
+                                extrema: true
+                                labels: false
+                                higher: true
+                                wider: true
+                              color_thresholds:
+                                - value: 0
+                                  color: '#1269F3'
+                                - value: 900
+                                  color: '#f39c12'
+                                - value: 1500
+                                  color: '#f32c12'
+                              name: Disco Utilizzato
+                        - type: vertical-stack
+                          cards:
+                            - type: horizontal-stack
+                              cards:
+                                - type: custom:mini-graph-card
+                                  entities:
+                                    - entity: >-
+                                        sensor.node_server_disk_free_percentage_2
+                                      unit: '%'
+                                  align_state: center
+                                  align_header: center
+                                  hour24: true
+                                  show:
+                                    name: true
+                                    icon: false
+                                    average: false
+                                    extrema: true
+                                    labels: false
+                                    higher: true
+                                    wider: true
+                                  color_thresholds:
+                                    - value: 0
+                                      color: '#1269F3'
+                                    - value: 50
+                                      color: '#f39c12'
+                                    - value: 80
+                                      color: '#f32c12'
+                                  name: Ram
+                                - type: custom:mini-graph-card
+                                  entities:
+                                    - entity: sensor.node_server_cpu_used_2
+                                      unit: '%'
+                                  align_state: center
+                                  align_header: center
+                                  hour24: true
+                                  show:
+                                    name: true
+                                    icon: false
+                                    average: false
+                                    extrema: true
+                                    labels: false
+                                    higher: true
+                                    wider: true
+                                  color_thresholds:
+                                    - value: 0
+                                      color: '#1269F3'
+                                    - value: 50
+                                      color: '#f39c12'
+                                    - value: 80
+                                      color: '#f32c12'
+                                  name: Carico CPU
+            - type: vertical-stack
+              cards:
+                - type: custom:button-card
+                  layout: icon_name_state2nd
+                  entity: sensor.template_tempo_di_avvio_proxmox
+                  name: Online Proxmox
+                  show_icon: true
+                  show_state: true
+                  icon: mdi:clock-outline
+                  styles:
+                    grid:
+                      - grid-template-columns: 50px auto
+                    icon:
+                      - padding: 0px 0px
+                      - height: 30px
+                      - width: 30px
+                    card:
+                      - '--ha-card-background': rgba(0, 0, 0, 0.0)
+                      - '--ha-card-box-shadow': none
+                    state:
+                      - padding: 0px 10px
+                      - justify-self: start
+                      - font-family: Roboto, sans-serif
+                      - font-size: 15px
+                    name:
+                      - padding: 0px 10px
+                      - justify-self: start
+                      - color: var(--primary-text-color)
+                - type: custom:button-card
+                  layout: icon_name_state2nd
+                  entity: sensor.tempo_avvio_server
+                  name: HomeAssistant
+                  show_icon: true
+                  show_state: true
+                  state_color: true
+                  icon: mdi:home-assistant
+                  styles:
+                    grid:
+                      - grid-template-columns: 50px auto
+                    icon:
+                      - padding: 0px 0px
+                      - height: 30px
+                      - width: 30px
+                    card:
+                      - '--ha-card-background': rgba(0, 0, 0, 0.0)
+                      - '--ha-card-box-shadow': none
+                    state:
+                      - padding: 0px 10px
+                      - justify-self: start
+                      - font-family: Roboto, sans-serif
+                      - font-size: 15px
+                    name:
+                      - padding: 0px 10px
+                      - justify-self: start
+                      - color: var(--primary-text-color)
+                - type: custom:button-card
+                  layout: icon_name_state2nd
+                  entity: sensor.template_tempo_di_avvio_windows
+                  name: Windows 11
+                  show_icon: true
+                  show_state: true
+                  icon: mdi:microsoft
+                  styles:
+                    grid:
+                      - grid-template-columns: 50px auto
+                    icon:
+                      - padding: 0px 0px
+                      - height: 30px
+                      - width: 30px
+                    card:
+                      - '--ha-card-background': rgba(0, 0, 0, 0.0)
+                      - '--ha-card-box-shadow': none
+                    state:
+                      - padding: 0px 10px
+                      - justify-self: start
+                      - font-family: Roboto, sans-serif
+                      - font-size: 15px
+                    name:
+                      - padding: 0px 10px
+                      - justify-self: start
+                      - color: var(--primary-text-color)
+        - type: horizontal-stack
+          cards:
+            - type: custom:bar-card
+              show_icon: true
+              align: split
+              columns: 1
+              max: 100
+              positions:
+                icon: inside
+                indicator: inside
+                name: inside
+                value: inside
+              unit_of_measurement: '%'
+              severity:
+                - color: '#1e90ff'
+                  from: 0
+                  to: 49
+                - color: Orange
+                  from: 50
+                  to: 80
+                - color: red
+                  from: 81
+                  to: 100
+              style: |
+                ha-card {
+                  --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                  --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                  --paper-item-icon-color: 'var(--text-primary-color';
+                  --ha-card-box-shadow: 'none';
+                }
+              entity: sensor.totale_ram
+              name: RAM
+              entity_row: true
+            - type: custom:bar-card
+              show_icon: true
+              align: split
+              columns: 1
+              max: 100
+              positions:
+                icon: inside
+                indicator: inside
+                name: inside
+                value: inside
+              unit_of_measurement: '%'
+              severity:
+                - color: '#1e90ff'
+                  from: 0
+                  to: 49
+                - color: Orange
+                  from: 50
+                  to: 80
+                - color: red
+                  from: 81
+                  to: 100
+              style: |
+                ha-card {
+                  --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                  --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                  --paper-item-icon-color: 'var(--text-primary-color';
+                  --ha-card-box-shadow: 'none';
+                }
+              entity: sensor.cpu_percentuale
+              name: CPU
+              icon: mdi:cpu-64-bit
+              entity_row: true
+        - type: horizontal-stack
+          cards:
+            - type: custom:bar-card
+              show_icon: true
+              align: split
+              columns: 1
+              max: 100
+              positions:
+                icon: inside
+                indicator: inside
+                name: inside
+                value: inside
+              unit_of_measurement: '%'
+              severity:
+                - color: '#1e90ff'
+                  from: 0
+                  to: 49
+                - color: orange
+                  from: 50
+                  to: 80
+                - color: red
+                  from: 81
+                  to: 100
+              style: |
+                ha-card {
+                    --paper-card-background-color: 'rgba(0, 0, 0, 0.0)';
+                    --ha-card-background: "rgba(0, 0, 0, 0.0)";
+                    --paper-item-icon-color: 'var(--text-primary-color';
+                    --ha-card-box-shadow: 'none';
+                }
+              entities:
+                - entity: sensor.disk_libero
+              entity_row: true
