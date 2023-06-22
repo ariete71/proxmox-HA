@@ -1,0 +1,217 @@
+homeassistant:
+  customize:
+    package.node_anchors:
+      customize: &customize
+        package: 'Statistiche Proxmox 1.0'
+        author: 'Giuseppe Marcialis'
+        reference: ' WebSite:  '
+
+ ####################################################
+ #                                                  #
+ #              IMPOSTAZIONI PACKAGE                #
+ #                                                  #
+ ####################################################
+
+        Device per notifica push: &push
+          - service: mobile_iphone_di_giuseppe
+          - service: mobile_app_xxx
+
+####################################################
+#                                                  #
+#              NOTIFICHE GRUPPO                    #
+#                                                  #
+####################################################
+
+notify:
+  - name: Gruppo Centro Proxmox
+    platform: group
+    services: *push
+
+####################################################
+#                                                  #
+#               INPUT NUMBER                       #
+#                                                  #
+####################################################
+
+input_number:
+
+  utilizzo_ram_proxmox:
+    name: Utilizzo Ram
+    mode: box
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+    icon: mdi:counter
+
+####################################################
+
+  utilizzo_cpu_proxmox:
+    name: Utilizzo Cpu
+    mode: box
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+    icon: mdi:counter
+
+####################################################
+
+  utilizzo_disco_proxmox:
+    name: Utilizzo HD
+    mode: box
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: "%"
+    icon: mdi:counter
+
+####################################################
+#                                                  #
+#                  BOOLEAN ALERT                   #
+#                                                  #
+####################################################
+input_boolean:
+
+
+  on_off_alert_proxmox:
+    name: On Off Alert HA
+
+#########################################################
+
+  alert_ram_proxmox:
+    name: Alert Ram
+
+#########################################################
+
+#  alert_temperatura:
+#    name: Alert Temperatura
+
+#########################################################
+
+  alert_cpu_proxmox:
+    name: Alert Cpu
+
+#########################################################
+
+  alert_disco_proxmox:
+    name: Alert Disco
+    
+####################################################
+#                                                  #
+#                   SENSORI                        #
+#                                                  #
+####################################################
+
+sensor:
+
+#  - platform: systemmonitor
+#    resources:
+#      - type: disk_use
+#      - type: disk_free
+#      - type: disk_use_percent
+#      - type: memory_use
+#      - type: memory_free
+#      - type: sensor.node_server_192_168_1_250_8006_memory_used_percentage
+#      - type: processor_use
+#      - type: last_boot
+#      - type: processor_temperature
+
+####################################################
+
+  - platform: template
+    sensors:
+      template_tempo_di_avvio_proxmox:
+        value_template: >
+          {% set hours = (as_timestamp(states('sensor.date_time_iso')) - as_timestamp(states('sensor.node_server_uptime_2')))/3600 | float(0) %}
+          {% set minutes = ((hours % 1) * 60) | int(0) %}
+          {% set hours = (hours - (hours % 1)) | int(0) %}
+          {%set day = ((hours |int(0) /24))|int(0) %}
+            {% if day|int(0) >0 %}
+              {{day}}d {{(hours|int(0))-(day*24)}}h {{minutes}}m
+            {% elif hours|int(0) >0 %}
+              {{hours}}h {{minutes}}m
+            {% else %}
+              {{minutes}}m
+            {% endif %}
+        icon_template: mdi:restart
+        
+####################################################
+
+  - platform: template
+    sensors:
+      template_tempo_di_avvio_windows:
+        value_template: >
+          {% set hours = (as_timestamp(states('sensor.date_time_iso')) - as_timestamp(states('sensor.qemu_windows_11_101_uptime')))/3600 | float(0) %}
+          {% set minutes = ((hours % 1) * 60) | int(0) %}
+          {% set hours = (hours - (hours % 1)) | int(0) %}
+          {%set day = ((hours |int(0) /24))|int(0) %}
+            {% if day|int(0) >0 %}
+              {{day}}d {{(hours|int(0))-(day*24)}}h {{minutes}}m
+            {% elif hours|int(0) >0 %}
+              {{hours}}h {{minutes}}m
+            {% else %}
+              {{minutes}}m
+            {% endif %}
+        icon_template: mdi:restart
+
+####################################################
+
+  - platform: template
+    sensors:
+      disk_libero:
+        unit_of_measurement: "GB"
+        value_template: "{{ ( states('sensor.node_server_disk_free')|float - states('sensor.node_server_disk_used_2')|float )| round (1) }}"
+
+####################################################
+
+  - platform: template
+    sensors:
+      disk_totale:
+        unit_of_measurement: "GB"
+        value_template: "{{ ( states('sensor.node_server_disk_used_2')|float + states('sensor.node_server_disk_free')|float )| round (1) }}"
+        
+####################################################
+
+  - platform: template
+    sensors:
+      cpu_temperatura:
+        friendly_name: 'CPU Temperatura'
+        unit_of_measurement: "°C"
+        value_template: temp
+        icon_template: mdi:thermometer
+
+####################################################
+
+  - platform: template
+    sensors:
+      cpu_percentuale:
+        friendly_name: 'CPU Uso'
+        unit_of_measurement: "%"
+        value_template: "{{ ( states('sensor.node_server_cpu_used_2')|float )| round (1) }}"
+        icon_template: mdi:cpu-64-bit
+####################################################
+
+  - platform: template
+    sensors:
+      totale_ram:
+        friendly_name: 'Totale Ram'
+        unit_of_measurement: 'MiB'
+        value_template: "{{ (states('sensor.node_server_memory_used_2')|float + (states('sensor.node_server_memory_free_2')|float))|round(1) }}"
+        icon_template: mdi:memory
+
+####################################################
+#                                                  #
+#                  AUTOMAZIONI                     #
+#                                                  #
+####################################################
+
+automation:
+
+- alias: Automazioni Statistiche
+  id: Automazioni Statistiche
+  trigger:
+  
+  - platform: template
+    value_template: "{{ states('sensor.node_server_disk_free_percentage_2')|int > states('input_number.utilizzo_ram')|int }}"
+    id: alert_ram
